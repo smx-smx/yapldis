@@ -1,0 +1,192 @@
+## yapldis
+ADB Broadband YAPL disassembler
+
+### What are yapl files?
+YAPL files are files used by the `httpd` binary shipped with ADB modem/routers.
+
+They use a custom programming language (Yet Another Programming Language?) that compiles to binary
+
+The binary format uses a proprietary VM, that has been reverse engineered in order to write this disassembler
+
+### VM architecture
+The virtual machine executes 8 bit instructions.
+The low 6 bit indicate the opcode, and the high 2 bits encode the size of the operand (max 4 bytes)
+
+The VM has the concepts of a stack, stack frames, arrays and indexed strings.
+
+#### Modules
+The VM supports modules. Some are builtins, but user modules can be loaded from file
+
+List of builtin modules and functions:
+- array
+	- len
+	- tolist
+	- sorted_set_list
+	- sorted_list
+	- keys
+	- remove_key
+	- sort
+	- match
+- cm
+	- get
+	- getv
+	- geto
+	- getmd
+	- getmdt
+	- getn
+	- getd
+	- a_set
+	- set
+	- a_setm
+	- setm
+	- save
+	- savehard
+	- stop
+	- start
+	- reset
+	- reboot
+	- add
+	- adds
+	- del
+	- pathsave
+	- dump
+	- dumpm
+	- user
+	- canadd
+- hmac
+	- sha256
+	- store_nonce
+	- delete_nonce
+- http
+	- error
+	- redirect
+	- redirect_abs
+	- urlput
+	- session_new
+	- session_end
+	- session_setlang
+	- session_get
+	- session_put
+	- session_check
+	- upload
+	- get_upload_filename
+	- ispage
+	- istpl
+	- setlanguage
+	- getlanguage
+	- flush
+	- set_content_type
+	- set_cache_control
+	- set_header
+	- build_url
+	- check_auth_basic
+- list
+	- add
+	- in
+	- pos
+	- insert
+	- put
+	- remove
+	- array
+	- get
+	- first
+	- last
+	- len
+- math
+	- and
+	- or
+	- not
+	- htoi
+	- itoh
+	- btoh
+	- htob
+	- hex_cut
+	- pow
+	- same_subnet
+	- valid_ip_in_subnet
+	- net_addr
+	- ip_in_range
+	- valid_ip
+	- broadcast_addr
+- net
+	- ipv4norm
+	- macnorm
+	- subnetnorm
+	- same_subnet
+	- valid_ip_in_subnet
+	- subnet_addr
+	- broadcast_addr
+	- ip_in_range
+	- valid_ip
+- str
+	- array
+	- cat
+	- get
+	- xmlescape
+	- shellescape
+	- jsescape
+	- httpescape
+	- len
+	- trim
+	- ltrim
+	- replace
+	- rtrim
+	- truncate
+	- split
+	- tokens
+	- toarray
+	- print
+	- tolower
+	- toupper
+	- objid
+	- getvar
+	- crypt
+	- salt
+	- isyapls
+	- match
+	- echo
+	- ipv4norm
+	- macnorm
+	- subnetnorm
+	- rand
+	- isvar
+- sys
+	- exec
+	- execprint
+	- execreadln
+	- execread
+	- touch
+	- write
+	- read
+	- readfull
+	- cat
+	- fork
+	- link
+	- unlink
+	- isfile
+	- isdir
+	- islink
+	- ls
+	- readdir
+	- openlog
+	- log
+	- mktemp
+	- trace
+	- random
+	- sleep
+	- exit
+	- copy
+	- mkdir
+	- rmdir
+	- mkfifo
+	- move
+	- installcallback
+- time
+	- iso8601toepoch
+	- utctolocal
+	- localtoutc
+	- epoch
+	- clock
+	- strp
+	- s2dhms
+	- strf
