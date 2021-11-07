@@ -74,6 +74,7 @@ class YaplFile {
 	
 	private $stringPool = array();
 	private $functions = array();
+	private $funcNamesMap = array();
 
 	private bool $loaded = false;
 	private int $code_offset;
@@ -129,7 +130,9 @@ class YaplFile {
 		}
 
 		for($i=0; $i<$this->hdr->num_functions; $i++){
-			$this->functions[$i] = $this->readFunctionEntry();
+			$fn = $this->readFunctionEntry();
+			$this->functions[$i] = $fn;
+			$this->funcNamesMap[$fn->name] = $i;
 		}
 
 		$this->code_offset = ftell($this->fh);
@@ -401,21 +404,17 @@ class YaplFile {
 		$code_start = -1;
 		$code_end = -1;
 
-		for($i=0; $i<$this->hdr->num_functions; $i++){
-			$fn = $this->functions[$i];
-			if($fn->name === $name){
-				$code_start = $fn->code_offset;
-				if($i + 1 < $this->hdr->num_functions){
-					$code_end = $this->functions[$i+1]->code_offset;
-				} else {
-					$code_end = $this->fileSize;
-				}
-				break;
-			}
+		$idx = $this->funcNamesMap[$name] ?? null;
+		if($idx === null){
+			throw new InvalidArgumentException("Function {$name} not found");
 		}
 
-		if($code_start === -1){
-			throw new InvalidArgumentException("Function {$name} not found");
+		$fn = $this->functions[$idx];
+		$code_start = $fn->code_offset;
+		if($idx + 1 < $this->hdr->num_functions){
+			$code_end = $this->functions[$idx+1]->code_offset;
+		} else {
+			$code_end = $this->fileSize;
 		}
 
 		$code_length = $code_end - $code_start;
