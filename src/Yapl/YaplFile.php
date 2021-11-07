@@ -194,126 +194,185 @@ class YaplFile {
 				case YaplOp::LDI: // LDI(idx): local data init (at stack top)
 					fwrite($fhOut, "LDI");
 					break;
-				// LDN(var): load data new
+				// LDN(st:var): load data new
 				// var can be a var index or a string variable (which is then resolved to an index)
 				case YaplOp::LDN:
 					fwrite($fhOut, "LDN");
 					break;
-				case YaplOp::LDL: // LDL(idx): load local variable from frame
+				// LDL(op:idx): load data local
+				case YaplOp::LDL:
 					fwrite($fhOut, "LDL [{$arg}]");
 					break;
-				case YaplOp::LDG: // 
+				// LDG(op:idx): load data global (variable from name)
+				case YaplOp::LDG:
 					fwrite($fhOut, "LDG [{$arg}] // \"{$this->stringPool[$arg]}\"");
 					break;
-				case YaplOp::LDA: // local data alloc
+				// LDA(op:idx): load data address
+				case YaplOp::LDA:
 					fwrite($fhOut, "LDA [{$arg}]");
 					break;
-				case YaplOp::STO: // STO(location, value): pop and store in frame
+				// STO(st:location, st:value): pop and store in frame
+				case YaplOp::STO:
 					fwrite($fhOut, "STO");
 					break;
-				case YaplOp::STK: // STK(location, value): store in frame without pop
+				// STK(st:location, st:value): store in frame without pop
+				case YaplOp::STK:
 					fwrite($fhOut, "STK");
 					break;
-				case YaplOp::CNE: // CNE: compare non equals
+				// CNE(st:a, st:b): compare non equals
+				case YaplOp::CNE:
 					fwrite($fhOut, "CNE");
 					break;
-				case YaplOp::CLT: // CLT: compare less than
+				// CLT(st:a, st:b): compare less than
+				case YaplOp::CLT:
 					fwrite($fhOut, "CLT");
 					break;
-				case YaplOp::CGT: // CGT: compare greater than
+				// CLE(st:a, st:b): compare less than or equal
+				case YaplOp::CLE:
+					fwrite($fhOut, "CLE");
+					break;
+				// CGE(st:a, st:b): compare greater than or equal
+				case YaplOp::CGE:
+					fwrite($fhOut, "CGE");
+					break;
+				// CGT(st:a, st:b): compare greater than
+				case YaplOp::CGT:
 					fwrite($fhOut, "CGT");
 					break;
-				case YaplOp::CEQ: // CEQ: compare equals
+				// CEQ(st:a, st:b): compare equals
+				case YaplOp::CEQ:
 					fwrite($fhOut, "CEQ");
 					break;
-				case YaplOp::ADA: 
+				// ADA(op:idx): array data address
+				case YaplOp::ADA:
 					fwrite($fhOut, "ADA [{$arg}]");
 					break;
-				case YaplOp::ADL:
+				// ADL(op:idx): array data load
+				case YaplOp::ADL: 
 					fwrite($fhOut, "ADL [{$arg}]");
 					break;
-				case YaplOp::ADG: // ?
+				// ADG(op:idx): array data global (variable from name)
+				case YaplOp::ADG:
 					fwrite($fhOut, "ADG [{$arg}] // \"{$this->stringPool[$arg]}\"");
 					break;
-				case YaplOp::AME: // AME: Array Member Element
+				// AME(st:arr, st:idx): find Array Member Element
+				case YaplOp::AME:
 					fwrite($fhOut, "AME");
 					break;
-				case YaplOp::AMEW: // AMEW: Array Member Element, create if not found
+				// AMEW(st:arr, st:idx): find Array Member Element, create if not found
+				case YaplOp::AMEW:
 					fwrite($fhOut, "AMEW");
 					break;
-				case YaplOp::AAE: // AAE: Array Append Element
+				// AAE(st:arr, st:el): Array Append Element
+				case YaplOp::AAE:
 					fwrite($fhOut, "AAE");
 					break;
-				case YaplOp::AAEW: // AAEW: Array Append Element, create if not found
+				// AAEW(st:arr, st:el): Array Append Element, create if not found
+				case YaplOp::AAEW:
 					fwrite($fhOut, "AAEW");
 					break;
-				case YaplOp::LDK: // LDK(): load key
+				// LDK(st:key): Load Data Key, push array key or null if invalid
+				case YaplOp::LDK:
 					fwrite($fhOut, "LDK");
 					break;
+				// BZ(op:addr): Branch to addr if Zero
 				case YaplOp::BZ:
 					fwrite($fhOut, "BZ #{$arg}");
 					break;
+				// J(op:addr): unconditional Jump to addr
 				case YaplOp::J:
 					fwrite($fhOut, "J #{$arg}");
 					break;
+				// BNE(op:addr): Branch on Not Equal to addr
 				case YaplOp::BNE:
 					fwrite($fhOut, "BNE #{$arg}");
 					break;
+				// CALL(op:str_idx): Call module function indicated by the indexed string
 				case YaplOp::CALL:
 					fwrite($fhOut, "CALL {$this->stringPool[$arg]}");
 					break;
-				case YaplOp::CALLD: // CALLD: indirect call (pop location from stack)
+				// CALLD(st:str_idx): Call module function (function name from stack)
+				case YaplOp::CALLD:
 					fwrite($fhOut, "CALLD");
 					break;
+				// RET(): pop stack frame and return to caller
 				case YaplOp::RET:
 					fwrite($fhOut, "RET");
 					break;
-				case YaplOp::HALT: // HALT(): stop VM
+				// HALT(): stop VM
+				case YaplOp::HALT:
 					fwrite($fhOut, "HALT");
 					break;
+				// MOD(a: st, b: st): perform a%b and push result
 				case YaplOp::MOD:
 					fwrite($fhOut, "MOD");
 					break;
+				// ADD(a: st, b: st): perform a+b and push result
 				case YaplOp::ADD:
 					fwrite($fhOut, "ADD");
 					break;
+				// SUB(a: st, b: st): perform a-b and push result
 				case YaplOp::SUB:
 					fwrite($fhOut, "SUB");
 					break;
+				// MUL(a: st, b: st): perform a*b and push result
 				case YaplOp::MUL:
 					fwrite($fhOut, "MUL");
 					break;
+				// DIV(a: st, b: st): perform a/b and push result
 				case YaplOp::DIV:
 					fwrite($fhOut, "DIV");
 					break;
-				case YaplOp::MBP: // MBP(): move (push) base pointer
+				// MBP(): Make (push) new base pointer
+				case YaplOp::MBP:
 					fwrite($fhOut, "MBP");
 					break;
-				case YaplOp::INCL: // Increment Local(idx): locals[idx]++
+				// INCL(var_idx): Increment Local, locals[idx]++
+				case YaplOp::INCL:
 					fwrite($fhOut, "INCL [{$arg}]");
 					break;
+				// POP(): pop variable from stack
 				case YaplOp::POP:
 					fwrite($fhOut, "POP");
 					break;
-				case YaplOp::LAND: // LAND(): Logic AND
+				// LAND(st:a, st:b): perform a&&b and push result
+				case YaplOp::LAND:
 					fwrite($fhOut, "LAND");
 					break;
-				case YaplOp::LOR: // LOR(): Logic OR
+				// LOR(st:a, st:b): perform a||b and push result
+				case YaplOp::LOR:
 					fwrite($fhOut, "LOR");
 					break;
-				case YaplOp::LNOT: // LNOT(): Logic NOT
+				// LNOT(st:a): perform !a and push result
+				case YaplOp::LNOT:
 					fwrite($fhOut, "LNOT");
 					break;
-				case YaplOp::STRGET: // STR_GET(): builtin call to 'str:get'
+				// BAND(st:a, st:b): perform a&b and push result
+				case YaplOp::BAND:
+					fwrite($fhOut, "BAND");
+					break;
+				// BAND(st:a, st:b): perform a|b and push result
+				case YaplOp::BOR:
+					fwrite($fhOut, "BOR");
+					break;
+				// BNOT(st:a): perform ~a and push result
+				case YaplOp::BNOT:
+					fwrite($fhOut, "BNOT");
+					break;
+				// STR_GET(): builtin call to 'str:get'
+				case YaplOp::STRGET:
 					fwrite($fhOut, "STR_GET // CALL str:get");
 					break;
-				case YaplOp::STRPRI: // STR_PRI(): builtin call to 'str:print'
+				// STR_PRI(): builtin call to 'str:print'
+				case YaplOp::STRPRI:
 					fwrite($fhOut, "STR_PRI // CALL str:print");
 					break;
-				case YaplOp::TPLSRC: // TPL_SRC(): builtin call to 'tpl:source'
+				// TPL_SRC(): builtin call to 'tpl:source'
+				case YaplOp::TPLSRC:
 					fwrite($fhOut, "TPL_SRC // CALL tpl:source");
 					break;
-				case YaplOp::TPLREAD: // TPL_READ(): builtin call to 'tpl:read'
+				// TPL_READ(): builtin call to 'tpl:read'
+				case YaplOp::TPLREAD:
 					fwrite($fhOut, "TPL_READ // CALL tpl:read");
 					break;
 				default:
@@ -333,7 +392,7 @@ class YaplFile {
 		}
 	}
 
-	public function disassemble(string $name){
+	public function disassemble(string $name, $fh = STDOUT){
 		if(!$this->loaded){
 			throw new LogicException("Call load first");
 		}
@@ -367,7 +426,7 @@ class YaplFile {
 		fseek($this->fh, $code_pa);
 
 		$code_buf = fread($this->fh, $code_length);
-		$this->dasmBuffer($code_buf, $code_va, STDOUT);
+		$this->dasmBuffer($code_buf, $code_va, $fh);
 		
 	}
 
