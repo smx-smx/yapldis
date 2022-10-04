@@ -65,7 +65,15 @@ abstract class YaplOp {
 	const CALLD = 47;
 }
 
+abstract class YaplFileType {
+	/** HTML mixed with YAPL */
+	const TPL = 0;
+	/** Pure YAPL module */
+	const YAPL = 1;
+}
+
 class YaplFile {
+	private string $filePath;
 	private $fh;
 	private int $fileSize;
 	
@@ -97,6 +105,7 @@ class YaplFile {
 	public function __construct(string $filePath){
 		self::init();
 		
+		$this->filePath = $filePath;
 		$this->fh = fopen($filePath, 'rb');
 		$this->fileSize = filesize($filePath);
 		$this->hdr = (self::$hdrT)->fromStream($this->fh);
@@ -390,11 +399,33 @@ class YaplFile {
 		}
 	}
 
-	public function disassembleAll(){
+	private function disassembleYaplFile(){
 		for($i=0; $i<$this->hdr->num_functions; $i++){
 			$fn = $this->functions[$i]->name;
 			fwrite(STDOUT, "== disassembly for '{$fn}' ==\n");
 			$this->disassemble($fn);
+		}
+	}
+
+	private function disassembleTplFile(){
+		// we're disassembling a TPL, so there's only 1 function
+		fwrite(STDOUT, "== TPL disassembly\n");
+		fseek($this->fh, $this->code_offset);
+		// read all code until EOF
+		$code = stream_get_contents($this->fh);
+		$this->dasmBuffer($code, 0, STDOUT);
+	}
+
+	public function disassembleAll(){
+		switch($this->hdr->type){
+			case YaplFileType::TPL:
+				$this->disassembleTplFile();
+				break;
+			case YaplFileType::YAPL:
+				$this->disassembleYaplFile();
+				break;
+			default:
+				throw new InvalidArgumentException("Invalid or unsupported file type {$this->hdr->type}");
 		}
 	}
 
