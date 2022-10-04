@@ -188,21 +188,24 @@ class YaplFile {
 
 			fwrite($fhOut, "{$cur_pc}: ");
 			switch($op){
-				case YaplOp::LDCI: // LDCI(imm): local data copy integer
+				// LDCI(imm): load data, constant integer
+				case YaplOp::LDCI: 
 					fwrite($fhOut, "LDCI #{$arg}");
 					break;
-				case YaplOp::LDCS: // LDCS(str_idx): local data copy string
+				// LDCS(str_idx): load data, constant string
+				case YaplOp::LDCS: 
 					fwrite($fhOut, "LDCS [{$arg}] // \"{$this->stringPool[$arg]}\"");
 					break;
-				case YaplOp::LDI: // LDI(idx): local data init (at stack top)
+				// LDI(idx): load data index?
+				case YaplOp::LDI:
 					fwrite($fhOut, "LDI");
 					break;
-				// LDN(st:var): load data new
+				// LDN(st:var): load data new?
 				// var can be a var index or a string variable (which is then resolved to an index)
 				case YaplOp::LDN:
 					fwrite($fhOut, "LDN");
 					break;
-				// LDL(op:idx): load data local
+				// LDL(op:idx): load data local?
 				case YaplOp::LDL:
 					fwrite($fhOut, "LDL [{$arg}]");
 					break;
@@ -210,7 +213,7 @@ class YaplFile {
 				case YaplOp::LDG:
 					fwrite($fhOut, "LDG [{$arg}] // \"{$this->stringPool[$arg]}\"");
 					break;
-				// LDA(op:idx): load data address
+				// LDA(op:idx): load data address?
 				case YaplOp::LDA:
 					fwrite($fhOut, "LDA [{$arg}]");
 					break;
@@ -354,7 +357,7 @@ class YaplFile {
 				case YaplOp::BAND:
 					fwrite($fhOut, "BAND");
 					break;
-				// BAND(st:a, st:b): perform a|b and push result
+				// BOR(st:a, st:b): perform a|b and push result
 				case YaplOp::BOR:
 					fwrite($fhOut, "BOR");
 					break;
