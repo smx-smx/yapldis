@@ -452,12 +452,15 @@ class YaplFile {
 		}
 
 		$code_length = $code_end - $code_start;
+		if($code_length < 1){
+			// empty function body
+			return;
+		}
 		
 		$code_va = $code_start;
 		$code_pa = $code_start + $this->code_offset;
 
 		fseek($this->fh, $code_pa);
-
 		$code_buf = fread($this->fh, $code_length);
 		$this->dasmBuffer($code_buf, $code_va, $fh);
 		
