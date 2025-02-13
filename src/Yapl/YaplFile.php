@@ -197,40 +197,41 @@ class YaplFile {
 
 			fwrite($fhOut, "{$cur_pc}: ");
 			switch($op){
-				// LDCI(imm): load data, constant integer
+				// LDCI(imm): load constant integer
 				case YaplOp::LDCI: 
 					fwrite($fhOut, "LDCI #{$arg}");
 					break;
-				// LDCS(str_idx): load data, constant string
+				// LDCS(str_idx): load constant string
 				case YaplOp::LDCS: 
 					fwrite($fhOut, "LDCS [{$arg}] // \"{$this->stringPool[$arg]}\"");
 					break;
-				// LDI(idx): load data index?
+				// LDI: dereference a variable on object, by popping it from the stack and 
+				// pushing the contained value
 				case YaplOp::LDI:
 					fwrite($fhOut, "LDI");
 					break;
-				// LDN(st:var): load data new?
-				// var can be a var index or a string variable (which is then resolved to an index)
+				// LDN(op:idx): load numeric value from variable, given the variable index.
 				case YaplOp::LDN:
-					fwrite($fhOut, "LDN");
+					fwrite($fhOut, "LDN [{$arg}]");
 					break;
-				// LDL(op:idx): load data local?
+				// LDL(op:idx): load local variable by index, overwriting the current one on the stack
 				case YaplOp::LDL:
 					fwrite($fhOut, "LDL [{$arg}]");
 					break;
-				// LDG(op:idx): load data global (variable from name)
+				// LDG(op:idx): load global variable by name (stringpool index)
 				case YaplOp::LDG:
 					fwrite($fhOut, "LDG [{$arg}] // \"{$this->stringPool[$arg]}\"");
 					break;
-				// LDA(op:idx): load data address?
+				// LDA(op:idx): load local variable on a new stack frame
 				case YaplOp::LDA:
 					fwrite($fhOut, "LDA [{$arg}]");
 					break;
-				// STO(st:location, st:value): pop and store in frame
+				// STO(st:location, st:value): pops location, then value, from the stack.
+				// then stores the given value in the given location
 				case YaplOp::STO:
 					fwrite($fhOut, "STO");
 					break;
-				// STK(st:location, st:value): store in frame without pop
+				// STK(st:location, st:value): like STO, but pushes the value back on the stack
 				case YaplOp::STK:
 					fwrite($fhOut, "STK");
 					break;
@@ -258,35 +259,39 @@ class YaplFile {
 				case YaplOp::CEQ:
 					fwrite($fhOut, "CEQ");
 					break;
-				// ADA(op:idx): array data address
+				// ADA(op:idx): push address/reference of another variable on the stack frame
 				case YaplOp::ADA:
 					fwrite($fhOut, "ADA [{$arg}]");
 					break;
-				// ADL(op:idx): array data load
+				// ADL(op:idx): push address/reference of a local variable
 				case YaplOp::ADL: 
 					fwrite($fhOut, "ADL [{$arg}]");
 					break;
-				// ADG(op:idx): array data global (variable from name)
+				// ADG(op:idx): push address/reference of a global variable (variable from name)
 				case YaplOp::ADG:
 					fwrite($fhOut, "ADG [{$arg}] // \"{$this->stringPool[$arg]}\"");
 					break;
-				// AME(st:arr, st:idx): find Array Member Element
+				// $FIXME: validate
+				// AME(st:arr, st:idx): push address/reference of an array member element
 				case YaplOp::AME:
 					fwrite($fhOut, "AME");
 					break;
-				// AMEW(st:arr, st:idx): find Array Member Element, create if not found
+				// $FIXME: validate
+				// AMEW(st:arr, st:idx): push address/reference of an array member element, create if not found
 				case YaplOp::AMEW:
 					fwrite($fhOut, "AMEW");
 					break;
+				// $FIXME: validate
 				// AAE(st:arr, st:el): Array Append Element
 				case YaplOp::AAE:
 					fwrite($fhOut, "AAE");
 					break;
+				// $FIXME: validate
 				// AAEW(st:arr, st:el): Array Append Element, create if not found
 				case YaplOp::AAEW:
 					fwrite($fhOut, "AAEW");
 					break;
-				// LDK(st:key): Load Data Key, push array key or null if invalid
+				// LDK: pop current object from the stack, and push its key value
 				case YaplOp::LDK:
 					fwrite($fhOut, "LDK");
 					break;
@@ -323,6 +328,8 @@ class YaplFile {
 					fwrite($fhOut, "MOD");
 					break;
 				// ADD(a: st, b: st): perform a+b and push result
+				// this instruction is "overloaded". if either `a` or `b` is a string, string concatenation is performed
+				// otherwise, integer sum is performed
 				case YaplOp::ADD:
 					fwrite($fhOut, "ADD");
 					break;
